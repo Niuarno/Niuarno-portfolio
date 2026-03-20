@@ -81,6 +81,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Convert level to number if provided
+    if (data.level !== undefined) {
+      data.level = parseInt(String(data.level), 10) || 0;
+    }
+
     const skill = await db.skill.update({
       where: { id },
       data,

@@ -2,15 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Twitter, Mail, ArrowUpRight, Globe, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Twitter, Mail, ArrowUpRight, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
-
-interface SocialLink {
-  id: string;
-  platform: string;
-  url: string;
-  icon: string;
-}
 
 interface Settings {
   [key: string]: string;
@@ -22,7 +15,6 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Twitter,
   Mail,
   Globe,
-  ExternalLink,
 };
 
 const defaultSocialLinks = [
@@ -41,21 +33,13 @@ const footerLinks = [
 ];
 
 export function Footer() {
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [settings, setSettings] = useState<Settings>({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [socialsRes, settingsRes] = await Promise.all([
-          fetch("/api/social-links"),
-          fetch("/api/settings"),
-        ]);
-        
-        const socialsData = await socialsRes.json();
+        const settingsRes = await fetch("/api/settings");
         const settingsData = await settingsRes.json();
-        
-        setSocialLinks(socialsData.socialLinks || []);
         setSettings(settingsData.settings || {});
       } catch (error) {
         console.error("Failed to fetch footer data:", error);
@@ -64,13 +48,24 @@ export function Footer() {
     fetchData();
   }, []);
 
-  const displaySocials = socialLinks.length > 0 
-    ? socialLinks.map((s) => ({
-        icon: iconMap[s.icon] || Globe,
-        href: s.url,
-        label: s.platform,
-      }))
-    : defaultSocialLinks;
+  // Build social links from settings
+  const socialLinks = [];
+  
+  if (settings.githubUrl) {
+    socialLinks.push({ icon: Github, href: settings.githubUrl, label: "GitHub" });
+  }
+  if (settings.linkedinUrl) {
+    socialLinks.push({ icon: Linkedin, href: settings.linkedinUrl, label: "LinkedIn" });
+  }
+  if (settings.twitterUrl) {
+    socialLinks.push({ icon: Twitter, href: settings.twitterUrl, label: "Twitter" });
+  }
+  if (settings.email) {
+    socialLinks.push({ icon: Mail, href: `mailto:${settings.email}`, label: "Email" });
+  }
+
+  // Use default if no social links in settings
+  const displaySocials = socialLinks.length > 0 ? socialLinks : defaultSocialLinks;
 
   return (
     <footer className="relative mt-auto border-t border-border bg-card/50 backdrop-blur-sm">
