@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("unread") // unread, read, replied
+  reply     String?  // Admin's reply to the message
+  important Boolean  @default(false) // Marked as important by admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String   // WordPress, Wix, Shopify, Custom
+  tags        String   // Comma-separated tags
+  image       String?  // Image URL or base64
+  link        String?  // Project URL
+  github      String?  // GitHub URL
+  color       String   @default("from-cyan-500 to-blue-500") // Gradient color
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String   // Icon name
+  features    String   // Comma-separated features
+  color       String   @default("from-cyan-500 to-blue-500")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  level     Int      @default(80) // 0-100
+  icon      String   // Icon name
+  category  String?  // CMS, Frontend, Backend, etc.
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Experience {
+  id          String   @id @default(cuid())
+  year        String
+  title       String
+  description String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   // GitHub, LinkedIn, Twitter, etc.
+  url       String
+  icon      String   // Icon name
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Visitor {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique // Unique session identifier
+  country      String   // Country name
+  countryCode  String   // ISO country code (e.g., US, BD, IN)
+  city         String?  // City name (optional)
+  page         String   // Page visited
+  referrer     String?  // Referrer URL
+  userAgent    String?  // Browser user agent
+  device       String   @default("desktop") // desktop, mobile, tablet
+  browser      String?  // Chrome, Firefox, Safari, etc.
+  os           String?  // Windows, macOS, Linux, iOS, Android
+  screenRes    String?  // Screen resolution
+  duration     Int      @default(0) // Session duration in seconds
+  isOnline     Boolean  @default(true) // Currently online
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([countryCode])
+  @@index([createdAt])
+  @@index([isOnline])
+}
+
+model PageView {
+  id         String   @id @default(cuid())
+  sessionId  String   // Reference to visitor session
+  page       String   // Page URL path
+  title      String?  // Page title
+  duration   Int      @default(0) // Time spent on page in seconds
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+}
