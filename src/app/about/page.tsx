@@ -15,11 +15,15 @@ import {
   Target,
   Rocket,
   RefreshCw,
+  Download,
+  ExternalLink,
+  Mail,
+  MapPin,
+  Sparkles,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { AnimatedText } from "@/components/animations/AnimatedText";
 import { FloatingOrbs, GridBackground } from "@/components/animations/FloatingElements";
-import { TiltCard } from "@/components/animations/InteractiveEffects";
 import { Footer } from "@/components/Footer";
 
 interface Skill {
@@ -99,6 +103,7 @@ export default function AboutPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -185,57 +190,236 @@ export default function AboutPage() {
         </div>
       </motion.section>
 
-      {/* About Content */}
+      {/* About Content with Enhanced Profile Section */}
       <section className="relative py-16 sm:py-24">
         <div className="container-responsive">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* Story */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Enhanced Profile Image Section */}
             <ScrollReveal>
+              <div className="relative">
+                {/* Decorative background elements */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-3xl blur-3xl opacity-60 animate-pulse" />
+                
+                {/* Main image container */}
+                <motion.div 
+                  className="relative"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                  {/* Animated border ring */}
+                  <motion.div 
+                    className="absolute -inset-2 rounded-[2rem]"
+                    style={{
+                      background: "linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)))",
+                      backgroundSize: "200% 200%",
+                    }}
+                    animate={{
+                      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
+                  
+                  {/* Inner container */}
+                  <div className="relative rounded-[1.75rem] bg-gradient-to-br from-card via-card to-muted p-8 overflow-hidden">
+                    {/* Floating particles */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      {[...Array(6)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-2 h-2 rounded-full bg-primary/30"
+                          initial={{ 
+                            x: `${Math.random() * 100}%`, 
+                            y: `${Math.random() * 100}%`,
+                            opacity: 0 
+                          }}
+                          animate={{ 
+                            y: [null, "-100%"],
+                            opacity: [0, 1, 0]
+                          }}
+                          transition={{
+                            duration: 3 + Math.random() * 2,
+                            repeat: Infinity,
+                            delay: i * 0.5,
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Profile image or avatar */}
+                    <div className="relative flex flex-col items-center">
+                      {settings.profileImage ? (
+                        <motion.div 
+                          className="relative group"
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.6 }}
+                        >
+                          {/* Glow effect behind image */}
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/40 to-accent/40 blur-2xl scale-110 group-hover:scale-125 transition-transform duration-500" />
+                          
+                          {/* Image container with animated border */}
+                          <motion.div 
+                            className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden ring-4 ring-primary/20 group-hover:ring-primary/40 transition-all duration-500"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <img 
+                              src={settings.profileImage} 
+                              alt={settings.ownerName || "Profile"} 
+                              className={`w-full h-full object-cover transition-all duration-700 ${imageLoaded ? 'blur-0 scale-100' : 'blur-lg scale-110'}`}
+                              onLoad={() => setImageLoaded(true)}
+                            />
+                            
+                            {/* Overlay on hover */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-8">
+                              <motion.span 
+                                initial={{ y: 20, opacity: 0 }}
+                                whileHover={{ y: 0, opacity: 1 }}
+                                className="text-white font-medium flex items-center gap-2"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                                {settings.ownerName?.split(' ')[0] || 'Developer'}
+                              </motion.span>
+                            </div>
+                          </motion.div>
+                          
+                          {/* Decorative corner elements */}
+                          <motion.div 
+                            className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                          >
+                            <Sparkles className="w-4 h-4 text-white" />
+                          </motion.div>
+                        </motion.div>
+                      ) : (
+                        /* Fallback avatar */
+                        <motion.div 
+                          className="relative group"
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.6 }}
+                        >
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/40 to-accent/40 blur-2xl scale-110" />
+                          <motion.div 
+                            className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-primary via-primary to-accent flex items-center justify-center ring-4 ring-primary/20"
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            <span className="text-7xl sm:text-8xl font-bold text-primary-foreground">
+                              {(settings.ownerName || "SN").split(" ").map(n => n[0]).join("")}
+                            </span>
+                          </motion.div>
+                        </motion.div>
+                      )}
+
+                      {/* Name and role below image */}
+                      <motion.div 
+                        className="mt-8 text-center"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                      >
+                        <h3 className="text-2xl sm:text-3xl font-bold mb-2">
+                          {settings.ownerName || "Saheduzzaman Nour"}
+                        </h3>
+                        <p className="text-primary font-medium mb-4">
+                          {settings.ownerRole || "Web Developer & CMS Expert"}
+                        </p>
+                        
+                        {/* Quick stats */}
+                        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-primary" />
+                            <span>{settings.location || "Worldwide"}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-primary" />
+                            <span>Available</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </ScrollReveal>
+
+            {/* Story */}
+            <ScrollReveal delay={0.2}>
               <div className="space-y-6">
-                <h2 className="text-2xl sm:text-3xl font-bold">
+                <motion.h2 
+                  className="text-3xl sm:text-4xl font-bold"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
                   My <span className="gradient-text">Story</span>
-                </h2>
-                <div className="space-y-4 text-muted-foreground">
-                  <p>
+                </motion.h2>
+                <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
                     My journey in web development began with a simple curiosity about how websites work.
                     What started as a hobby quickly evolved into a passionate career. I discovered the
                     power of content management systems and fell in love with their ability to empower
                     businesses and individuals to manage their online presence effectively.
-                  </p>
-                  <p>
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
                     Over the years, I&apos;ve had the privilege of working with diverse clients from various
                     industries. Each project has taught me something new and helped me refine my skills.
                     I believe in continuous learning and staying updated with the latest web technologies
                     and design trends.
-                  </p>
-                  <p>
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                  >
                     Today, under my brand <span className="text-primary font-semibold">Niuarno</span>,
                     I offer comprehensive web development services that help businesses thrive in the
                     digital landscape. My goal is simple: create websites that not only look stunning
                     but also deliver measurable results.
-                  </p>
+                  </motion.p>
                 </div>
-              </div>
-            </ScrollReveal>
 
-            {/* Photo/Visual */}
-            <ScrollReveal delay={0.2}>
-              <TiltCard className="relative aspect-square max-w-md mx-auto lg:mx-0">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 blur-2xl" />
-                <div className="relative h-full rounded-3xl bg-gradient-to-br from-card to-muted border border-border overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <span className="text-5xl font-bold text-primary-foreground">
-                          {(settings.ownerName || "SN").split(" ").map(n => n[0]).join("")}
-                        </span>
-                      </div>
-                      <h3 className="text-2xl font-bold">{settings.ownerName || "Saheduzzaman Nour"}</h3>
-                      <p className="text-muted-foreground">{settings.ownerRole || "Web Developer & CMS Expert"}</p>
-                    </div>
-                  </div>
-                </div>
-              </TiltCard>
+                {/* CTA Buttons */}
+                <motion.div 
+                  className="flex flex-wrap gap-4 pt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                >
+                  <motion.a
+                    href="/contact"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Get in Touch
+                  </motion.a>
+                  <motion.a
+                    href="/portfolio"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground font-semibold rounded-full hover:bg-muted transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Portfolio
+                  </motion.a>
+                </motion.div>
+              </div>
             </ScrollReveal>
           </div>
         </div>

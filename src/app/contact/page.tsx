@@ -16,6 +16,7 @@ import {
   AlertCircle,
   RefreshCw,
   Globe,
+  Facebook,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { AnimatedText } from "@/components/animations/AnimatedText";
@@ -30,31 +31,18 @@ interface Settings {
   [key: string]: string;
 }
 
-interface SocialLink {
-  id: string;
-  platform: string;
-  url: string;
-  icon: string;
-}
-
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Github,
   Linkedin,
   Twitter,
   Mail,
   Globe,
+  Facebook,
 };
-
-const defaultSocialLinks = [
-  { icon: Github, href: "https://github.com/niuarno", label: "GitHub" },
-  { icon: Linkedin, href: "https://linkedin.com/in/niuarno", label: "LinkedIn" },
-  { icon: Twitter, href: "https://twitter.com/niuarno", label: "Twitter" },
-];
 
 export default function ContactPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<Settings>({});
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState({
     name: "",
@@ -76,15 +64,9 @@ export default function ContactPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [settingsRes, socialRes] = await Promise.all([
-          fetch("/api/settings"),
-          fetch("/api/social-links"),
-        ]);
+        const settingsRes = await fetch("/api/settings");
         const settingsData = await settingsRes.json();
-        const socialData = await socialRes.json();
-        
         setSettings(settingsData.settings || {});
-        setSocialLinks(socialData.socialLinks || []);
       } catch {
         console.error("Failed to fetch data");
       } finally {
@@ -135,8 +117,8 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Phone",
-      value: settings.phone || "+1 (555) 123-4567",
-      href: `tel:${settings.phone || "+15551234567"}`,
+      value: settings.phone || "+880 1974-962406",
+      href: `tel:${settings.phone || "+8801974962406"}`,
     },
     {
       icon: MapPin,
@@ -152,13 +134,28 @@ export default function ContactPage() {
     },
   ];
 
-  const displaySocialLinks = socialLinks.length > 0
-    ? socialLinks.map((s) => ({
-        icon: iconMap[s.icon] || Globe,
-        href: s.url,
-        label: s.platform,
-      }))
-    : defaultSocialLinks;
+  // Build social links from settings
+  const socialLinks = [];
+  if (settings.githubUrl) {
+    socialLinks.push({ icon: Github, href: settings.githubUrl, label: "GitHub" });
+  }
+  if (settings.linkedinUrl) {
+    socialLinks.push({ icon: Linkedin, href: settings.linkedinUrl, label: "LinkedIn" });
+  }
+  if (settings.twitterUrl) {
+    socialLinks.push({ icon: Twitter, href: settings.twitterUrl, label: "Twitter" });
+  }
+  if (settings.facebookUrl) {
+    socialLinks.push({ icon: Facebook, href: settings.facebookUrl, label: "Facebook" });
+  }
+
+  // Default social links if none set
+  const displaySocialLinks = socialLinks.length > 0 ? socialLinks : [
+    { icon: Github, href: "https://github.com/niuarno", label: "GitHub" },
+    { icon: Linkedin, href: "https://linkedin.com/in/niuarno", label: "LinkedIn" },
+    { icon: Twitter, href: "https://twitter.com/niuarno", label: "Twitter" },
+    { icon: Facebook, href: "https://facebook.com/niuarno", label: "Facebook" },
+  ];
 
   return (
     <div ref={containerRef} className="relative min-h-screen">

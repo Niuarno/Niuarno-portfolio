@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Twitter, Mail, ArrowUpRight, Globe } from "lucide-react";
+import { Github, Linkedin, Twitter, Mail, ArrowUpRight, Globe, Facebook } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Settings {
@@ -15,13 +15,14 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Twitter,
   Mail,
   Globe,
+  Facebook,
 };
 
 const defaultSocialLinks = [
   { icon: Github, href: "https://github.com/niuarno", label: "GitHub" },
   { icon: Linkedin, href: "https://linkedin.com/in/niuarno", label: "LinkedIn" },
   { icon: Twitter, href: "https://twitter.com/niuarno", label: "Twitter" },
-  { icon: Mail, href: "mailto:contact@niuarno.com", label: "Email" },
+  { icon: Facebook, href: "https://facebook.com/niuarno", label: "Facebook" },
 ];
 
 const footerLinks = [
@@ -60,8 +61,8 @@ export function Footer() {
   if (settings.twitterUrl) {
     socialLinks.push({ icon: Twitter, href: settings.twitterUrl, label: "Twitter" });
   }
-  if (settings.email) {
-    socialLinks.push({ icon: Mail, href: `mailto:${settings.email}`, label: "Email" });
+  if (settings.facebookUrl) {
+    socialLinks.push({ icon: Facebook, href: settings.facebookUrl, label: "Facebook" });
   }
 
   // Use default if no social links in settings
