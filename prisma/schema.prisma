@@ -29,6 +29,7 @@ model ContactMessage {
   message   String
   status    String   @default("unread") // unread, read, replied
   reply     String?  // Admin's reply to the message
+  important Boolean  @default(false) // Marked as important by admin
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -98,4 +99,40 @@ model SiteSetting {
   value       String
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+model Visitor {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique // Unique session identifier
+  country      String   // Country name
+  countryCode  String   // ISO country code (e.g., US, BD, IN)
+  city         String?  // City name (optional)
+  page         String   // Page visited
+  referrer     String?  // Referrer URL
+  userAgent    String?  // Browser user agent
+  device       String   @default("desktop") // desktop, mobile, tablet
+  browser      String?  // Chrome, Firefox, Safari, etc.
+  os           String?  // Windows, macOS, Linux, iOS, Android
+  screenRes    String?  // Screen resolution
+  duration     Int      @default(0) // Session duration in seconds
+  isOnline     Boolean  @default(true) // Currently online
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([countryCode])
+  @@index([createdAt])
+  @@index([isOnline])
+}
+
+model PageView {
+  id         String   @id @default(cuid())
+  sessionId  String   // Reference to visitor session
+  page       String   // Page URL path
+  title      String?  // Page title
+  duration   Int      @default(0) // Time spent on page in seconds
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
 }

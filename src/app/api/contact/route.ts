@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PATCH - Update message status/reply (admin only)
+// PATCH - Update message status/reply/important (admin only)
 export async function PATCH(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -78,7 +78,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, status, reply } = body;
+    const { id, status, reply, important } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -87,9 +87,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateData: { status?: string; reply?: string } = {};
+    const updateData: { status?: string; reply?: string; important?: boolean } = {};
     if (status) updateData.status = status;
     if (reply !== undefined) updateData.reply = reply;
+    if (important !== undefined) updateData.important = important;
 
     const updatedMessage = await db.contactMessage.update({
       where: { id },
