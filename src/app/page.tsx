@@ -1,4 +1,4 @@
-// Home page - Updated
+// Home page - Updated with dynamic data
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -16,6 +16,9 @@ import {
   Mail,
   MapPin,
   Clock,
+  Database,
+  Layers,
+  ShoppingCart,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { AnimatedText } from "@/components/animations/AnimatedText";
@@ -26,6 +29,26 @@ import { Footer } from "@/components/Footer";
 interface Settings {
   [key: string]: string;
 }
+
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Code2,
+  Palette,
+  Zap,
+  Globe,
+  Database,
+  Layers,
+  ShoppingCart,
+  Code2,
+  Braces: Code2,
+};
 
 const defaultServices = [
   {
@@ -55,6 +78,7 @@ const stats = [
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<Settings>({});
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   
   const { scrollYProgress } = useScroll({
@@ -68,17 +92,26 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/settings");
-        const data = await res.json();
-        setSettings(data.settings || {});
+        const [settingsRes, servicesRes] = await Promise.all([
+          fetch("/api/settings"),
+          fetch("/api/services"),
+        ]);
+        
+        const settingsData = await settingsRes.json();
+        const servicesData = await servicesRes.json();
+        
+        setSettings(settingsData.settings || {});
+        setServices(servicesData.services || []);
       } catch {
-        console.error("Failed to fetch settings");
+        console.error("Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  const displayServices = services.length > 0 ? services : [];
 
   return (
     <div ref={containerRef} className="relative min-h-screen">
@@ -195,27 +228,36 @@ export default function Home() {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {defaultServices.map((service, index) => (
-              <ScrollReveal key={service.title} delay={index * 0.15}>
-                <motion.div
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  className="group relative p-6 lg:p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300"
-                >
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative z-10">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                      <service.icon className="w-7 h-7 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                      {service.title}
-                    </h3>
-                    <p className="text-muted-foreground">{service.description}</p>
-                  </div>
-                </motion.div>
-              </ScrollReveal>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {(displayServices.length > 0 ? displayServices : defaultServices.map((s, i) => ({ ...s, id: `default-${i}`, icon: s.icon.name || 'Globe', color: 'from-cyan-500 to-blue-500' }))).map((service, index) => {
+                const IconComponent = typeof service.icon === 'string' ? (iconMap[service.icon] || Globe) : (service.icon as React.ComponentType<{ className?: string }>);
+                return (
+                  <ScrollReveal key={service.id || index} delay={index * 0.15}>
+                    <motion.div
+                      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                      className="group relative p-6 lg:p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300"
+                    >
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative z-10">
+                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${service.color || 'from-primary/10 to-accent/10'} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                          <IconComponent className="w-7 h-7 text-white" />
+                        </div>
+                        <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                          {service.title}
+                        </h3>
+                        <p className="text-muted-foreground">{service.description}</p>
+                      </div>
+                    </motion.div>
+                  </ScrollReveal>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

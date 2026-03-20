@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowUpRight,
   ExternalLink,
@@ -186,16 +187,24 @@ export default function PortfolioPage() {
                         {/* Image */}
                         <div className="relative aspect-video overflow-hidden">
                           <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-20`} />
-                          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
                           
-                          {/* Placeholder visual */}
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                              <span className="text-3xl font-bold text-white/80">
-                                {project.title.charAt(0)}
-                              </span>
+                          {project.image ? (
+                            <img
+                              src={project.image}
+                              alt={project.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <span className="text-3xl font-bold text-white/80">
+                                  {project.title.charAt(0)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          
+                          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
 
                           {/* Hover overlay */}
                           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-4">

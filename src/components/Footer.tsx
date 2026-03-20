@@ -2,9 +2,30 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Twitter, Mail, ArrowUpRight } from "lucide-react";
+import { Github, Linkedin, Twitter, Mail, ArrowUpRight, Globe, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
 
-const socialLinks = [
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+}
+
+interface Settings {
+  [key: string]: string;
+}
+
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Github,
+  Linkedin,
+  Twitter,
+  Mail,
+  Globe,
+  ExternalLink,
+};
+
+const defaultSocialLinks = [
   { icon: Github, href: "https://github.com/niuarno", label: "GitHub" },
   { icon: Linkedin, href: "https://linkedin.com/in/niuarno", label: "LinkedIn" },
   { icon: Twitter, href: "https://twitter.com/niuarno", label: "Twitter" },
@@ -20,6 +41,37 @@ const footerLinks = [
 ];
 
 export function Footer() {
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [settings, setSettings] = useState<Settings>({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [socialsRes, settingsRes] = await Promise.all([
+          fetch("/api/social-links"),
+          fetch("/api/settings"),
+        ]);
+        
+        const socialsData = await socialsRes.json();
+        const settingsData = await settingsRes.json();
+        
+        setSocialLinks(socialsData.socialLinks || []);
+        setSettings(settingsData.settings || {});
+      } catch (error) {
+        console.error("Failed to fetch footer data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const displaySocials = socialLinks.length > 0 
+    ? socialLinks.map((s) => ({
+        icon: iconMap[s.icon] || Globe,
+        href: s.url,
+        label: s.platform,
+      }))
+    : defaultSocialLinks;
+
   return (
     <footer className="relative mt-auto border-t border-border bg-card/50 backdrop-blur-sm">
       <div className="container-responsive py-12">
@@ -34,12 +86,11 @@ export function Footer() {
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                   <span className="text-lg font-bold text-primary-foreground">N</span>
                 </div>
-                <span className="text-xl font-bold gradient-text">Niuarno</span>
+                <span className="text-xl font-bold gradient-text">{settings.siteName || "Niuarno"}</span>
               </motion.div>
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs">
-              Crafting digital experiences with precision and passion. 
-              Expert in WordPress, Wix, and Shopify development.
+              {settings.siteDescription || "Crafting digital experiences with precision and passion. Expert in WordPress, Wix, and Shopify development."}
             </p>
           </div>
 
@@ -64,7 +115,7 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Connect</h3>
             <div className="flex gap-4">
-              {socialLinks.map((social) => (
+              {displaySocials.map((social) => (
                 <motion.a
                   key={social.label}
                   href={social.href}
@@ -88,10 +139,10 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Niuarno. All rights reserved.
+            © {new Date().getFullYear()} {settings.siteName || "Niuarno"}. All rights reserved.
           </p>
           <p className="text-muted-foreground text-sm">
-            Designed & Built by <span className="text-primary">Saheduzzaman Nour</span>
+            Designed & Built by <span className="text-primary">{settings.ownerName || "Saheduzzaman Nour"}</span>
           </p>
         </div>
       </div>

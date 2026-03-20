@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -16,6 +16,9 @@ import {
   Code,
   Smartphone,
   TrendingUp,
+  Database,
+  Layers,
+  RefreshCw,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { AnimatedText } from "@/components/animations/AnimatedText";
@@ -23,50 +26,29 @@ import { FloatingOrbs, GridBackground } from "@/components/animations/FloatingEl
 import { MagneticButton, TiltCard } from "@/components/animations/InteractiveEffects";
 import { Footer } from "@/components/Footer";
 
-const services = [
-  {
-    icon: Globe,
-    title: "WordPress Development",
-    description: "Custom WordPress solutions tailored to your business needs, from simple blogs to complex e-commerce platforms.",
-    features: [
-      "Custom Theme Development",
-      "Plugin Development & Customization",
-      "WooCommerce Integration",
-      "Speed Optimization",
-      "Security Hardening",
-      "Maintenance & Support",
-    ],
-    color: "from-cyan-500 to-blue-500",
-  },
-  {
-    icon: Palette,
-    title: "Wix Website Design",
-    description: "Stunning Wix websites that combine beautiful design with powerful functionality for your business.",
-    features: [
-      "Custom Design Implementation",
-      "Velo JavaScript Development",
-      "Wix Stores Setup",
-      "Booking Systems",
-      "SEO Optimization",
-      "Mobile Responsiveness",
-    ],
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    icon: ShoppingCart,
-    title: "Shopify Stores",
-    description: "High-converting Shopify e-commerce stores designed to maximize sales and customer satisfaction.",
-    features: [
-      "Store Setup & Configuration",
-      "Custom Theme Development",
-      "App Integration",
-      "Payment Gateway Setup",
-      "Inventory Management",
-      "Conversion Optimization",
-    ],
-    color: "from-green-500 to-teal-500",
-  },
-];
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  features: string;
+  color: string;
+}
+
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Globe,
+  ShoppingCart,
+  Palette,
+  Settings,
+  Search,
+  Shield,
+  Zap,
+  Code,
+  Smartphone,
+  TrendingUp,
+  Database,
+  Layers,
+};
 
 const additionalServices = [
   {
@@ -136,12 +118,30 @@ const process = [
 
 export default function ServicesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
 
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch("/api/services");
+        const data = await res.json();
+        setServices(data.services || []);
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
 
   return (
     <div ref={containerRef} className="relative min-h-screen">
@@ -188,53 +188,62 @@ export default function ServicesPage() {
       {/* Main Services */}
       <section className="relative py-16 sm:py-24">
         <div className="container-responsive">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {services.map((service, index) => (
-              <ScrollReveal key={service.title} delay={index * 0.15}>
-                <TiltCard>
-                  <motion.div
-                    whileHover={{ y: -8 }}
-                    className="group relative h-full p-6 lg:p-8 rounded-2xl bg-card border border-border overflow-hidden"
-                  >
-                    {/* Gradient overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-                    
-                    {/* Icon */}
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-6`}>
-                      <service.icon className="w-8 h-8 text-white" />
-                    </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+              {services.map((service, index) => {
+                const IconComponent = iconMap[service.icon] || Globe;
+                return (
+                  <ScrollReveal key={service.id} delay={index * 0.15}>
+                    <TiltCard>
+                      <motion.div
+                        whileHover={{ y: -8 }}
+                        className="group relative h-full p-6 lg:p-8 rounded-2xl bg-card border border-border overflow-hidden"
+                      >
+                        {/* Gradient overlay */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                        
+                        {/* Icon */}
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-6`}>
+                          <IconComponent className="w-8 h-8 text-white" />
+                        </div>
 
-                    {/* Content */}
-                    <h3 className="text-xl font-bold mb-3">{service.title}</h3>
-                    <p className="text-muted-foreground mb-6">{service.description}</p>
+                        {/* Content */}
+                        <h3 className="text-xl font-bold mb-3">{service.title}</h3>
+                        <p className="text-muted-foreground mb-6">{service.description}</p>
 
-                    {/* Features */}
-                    <ul className="space-y-3">
-                      {service.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-3 text-sm">
-                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                        {/* Features */}
+                        <ul className="space-y-3">
+                          {service.features.split(",").map((feature) => (
+                            <li key={feature} className="flex items-center gap-3 text-sm">
+                              <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                              <span className="text-muted-foreground">{feature.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
 
-                    {/* CTA */}
-                    <div className="mt-8">
-                      <MagneticButton>
-                        <Link
-                          href="/contact"
-                          className="inline-flex items-center gap-2 text-primary font-medium group/link"
-                        >
-                          Get Started
-                          <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                        </Link>
-                      </MagneticButton>
-                    </div>
-                  </motion.div>
-                </TiltCard>
-              </ScrollReveal>
-            ))}
-          </div>
+                        {/* CTA */}
+                        <div className="mt-8">
+                          <MagneticButton>
+                            <Link
+                              href="/contact"
+                              className="inline-flex items-center gap-2 text-primary font-medium group/link"
+                            >
+                              Get Started
+                              <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                            </Link>
+                          </MagneticButton>
+                        </div>
+                      </motion.div>
+                    </TiltCard>
+                  </ScrollReveal>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
